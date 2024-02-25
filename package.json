@@ -10,12 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "preline": "^2.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwind-merge": "^2.2.1",
     "unzipit": "^1.4.3",
-    "vite-plugin-svgr": "^4.2.0",
     "wink-eng-lite-web-model": "^1.5.2",
     "wink-lemmatizer": "^3.0.4",
     "wink-nlp": "^1.14.3"
