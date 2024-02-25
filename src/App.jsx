@@ -1,9 +1,17 @@
-import { useState } from 'react';
-import { parseEpub } from './utils/parseEpub';
-import { getWordFrequency } from './utils/getWordFrequency';
+import { useState, useEffect, useRef } from 'react';
+import { parseEpub } from '@/utils/parseEpub';
+import { getWordFrequency } from '@/utils/getWordFrequency';
+import { Pagination } from './components/pagination';
+import 'preline/preline';
 
 const App = () => {
-  const [state, setState] = useState([]);
+  const [words, setWords] = useState([]);
+  const [page, setPage] = useState(1);
+  const myRef = useRef(null);
+
+  useEffect(() => {
+    window.HSStaticMethods.autoInit();
+  }, []);
 
   const handleChange = async (e) => {
     const file = e.target.files.item(0);
@@ -16,9 +24,13 @@ const App = () => {
         result = getWordFrequency(await file.text());
       }
 
-      setState([...result].sort((a, b) => b[1] - a[1]));
+      setWords([...result].sort((a, b) => b[1] - a[1]));
+      setPage(1);
     }
   };
+
+  const limit = 100;
+  const paginatedWords = words.slice((page - 1) * limit, page * limit);
 
   return (
     <>
@@ -26,9 +38,9 @@ const App = () => {
         <div className='container mx-auto px-4 md:px-24'>Wordy</div>
       </header>
 
-      <div className='container mx-auto px-4 md:px-24 mt-6'>
+      <main className='container mx-auto px-4 md:px-24 mt-6 mb-10'>
         <label className='mb-2 text-sm font-medium' htmlFor='file'>
-          Choose .epub, .txt, .srt file
+          Upload file
         </label>
 
         <input
@@ -39,20 +51,37 @@ const App = () => {
           onChange={handleChange}
         />
 
-        {!!state.length && (
+        <p className='mt-1 text-sm text-gray-500 dark:text-gray-300'>
+          EPUB, TXT or SRT
+        </p>
+
+        {!!paginatedWords.length && (
           <>
-            <h2 className='mt-5 mb-4 font-bold text-xl'>
-              Unique Words: {state.length}
+            <h2 className='mt-5 mb-4 font-bold text-xl' ref={myRef}>
+              Unique Words: {words.length}
             </h2>
 
-            {state.map(([word, frequency]) => (
-              <p className='p-2 mb-2 flex shadow font-medium' key={word}>
-                {word} - {frequency}
-              </p>
+            {paginatedWords.map(([word, frequency]) => (
+              <div className='p-2 mb-2 flex shadow' key={word}>
+                <input className='accent-black w-5 mr-5' type='checkbox' />
+                <p className='font-medium'>
+                  {word} - <span>{frequency}</span>
+                </p>
+              </div>
             ))}
+
+            <Pagination
+              page={page}
+              limit={limit}
+              items={words.length}
+              setPage={(page) => {
+                myRef.current.scrollIntoView();
+                setPage(page);
+              }}
+            />
           </>
         )}
-      </div>
+      </main>
     </>
   );
 };
